@@ -1,0 +1,9 @@
+Our project uses Atheros-CSI-Tool to extract fine-grained CSI, then process CSI using Matlab
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+CSI extraction:
+The Atheros-CSI-Tool installation and tutorial can be found in the link https://github.com/xieyaxiongfly/Atheros-CSI-Tool-UserSpace-APP
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Data processing:
+All the source codes are stored in data_processing.m. In order to run data_processing.m, you need keep read_log_file.m and read_csi.c in the same directory.
+

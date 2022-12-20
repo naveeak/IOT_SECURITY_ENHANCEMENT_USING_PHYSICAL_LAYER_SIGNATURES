@@ -1,0 +1,147 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>qam_ber</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-02-28"><meta name="DC.source" content="qam_ber.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">16-QAM Modulation</a></li><li><a href="#4">QAM De-Modulation</a></li><li><a href="#5">Symbols to Msg Conversion</a></li><li><a href="#6">Plot of  BER vs Eb/No</a></li></ul></div><pre class="codeinput">clc;
+clear <span class="string">all</span>;
+close <span class="string">all</span>;
+bits = 1.e6;
+msg  = round(rand(1,bits));                                                             <span class="comment">% Generating Random Bit Stream</span>
+M = [4 16 64 256];                                                                                 <span class="comment">% M-ary</span>
+<span class="keyword">for</span> j=1:4
+</pre><h2 id="2">16-QAM Modulation</h2><pre class="codeinput">bits_sym = log2(M(j));                                                                             <span class="comment">% Bits per Symbol for M-ary</span>
+sym_tx = s2p(msg,bits_sym);                                                               <span class="comment">% Serial to Parallel Conversion for QAM</span>
+H_Tx = modem.qammod(<span class="string">'M'</span>, M(j), <span class="string">'PHASEOFFSET'</span>, 0, <span class="string">'SYMBOLORDER'</span>, <span class="string">'BINARY'</span>, <span class="keyword">...</span>
+                                                    <span class="string">'INPUTTYPE'</span>, <span class="string">'BIT'</span>);                           <span class="comment">% Generate Handle for Modulation</span>
+qam_tx = modulate(H_Tx,sym_tx);                                               <span class="comment">% Modulation</span>
+<span class="comment">%==================================== CHANNEL =======================================%</span>
+Eb_No = 0:2:30;
+SNR = Eb_No + 10*log10(log2(M(j)));                                         <span class="comment">% Finding out SNR from Eb/No</span>
+<span class="keyword">for</span> i=1:length(Eb_No)
+</pre><pre class="codeinput">    qam_n = awgn(qam_tx,SNR(i),<span class="string">'measured'</span>);                      <span class="comment">% Adding AWGN</span>
+    <span class="comment">% ================================== Rx ============================================%</span>
+</pre><h2 id="4">QAM De-Modulation</h2><pre class="codeinput">qam_rx = p2s(qam_n);
+H_Rx = modem.qamdemod(<span class="string">'M'</span>, M(j), <span class="string">'PHASEOFFSET'</span>, 0, <span class="string">'SYMBOLORDER'</span>, <span class="string">'BINARY'</span>, <span class="keyword">...</span>
+                 <span class="string">'OUTPUTTYPE'</span>, <span class="string">'BIT'</span>);                                                 <span class="comment">% Generate Handle for Modulation</span>
+sym_rx = demodulate(H_Rx,qam_rx);                                <span class="comment">% Modulating data to QAM</span>
+</pre><h2 id="5">Symbols to Msg Conversion</h2><pre class="codeinput">msg_rx = p2s(sym_rx);
+msg_rx = msg_rx(1,1:length(msg));
+[ErrBits BER(i,j)] = symerr(msg_rx,msg);                            <span class="comment">% Calculating BER by comparisson of Rx and Tx msg</span>
+</pre><h2 id="6">Plot of  BER vs Eb/No</h2><pre class="codeinput"><span class="keyword">end</span>
+</pre><pre class="codeoutput error">Undefined function 's2p' for input arguments of type 'double'.
+
+Error in qam_ber (line 10)
+sym_tx = s2p(msg,bits_sym);                                                               % Serial to Parallel Conversion for QAM
+</pre><pre class="codeinput"><span class="keyword">end</span>
+semilogy(Eb_No,BER(:,1),<span class="string">'r-*'</span>,Eb_No,BER(:,2),<span class="string">'b-v'</span>,Eb_No,BER(:,3),<span class="string">'y-s'</span>,Eb_No,BER(:,4),<span class="string">'m-o'</span>);
+legend(<span class="string">'M=4'</span>,<span class="string">'M=16'</span>,<span class="string">'M=64'</span>,<span class="string">'M=256'</span>);
+title(<span class="string">'BER for QAM using AWGN channel'</span>);
+ylabel(<span class="string">'BER'</span>);
+xlabel(<span class="string">'Eb/No (dB)'</span>);
+grid;
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clc;
+clear all;
+close all;
+bits = 1.e6;
+msg  = round(rand(1,bits));                                                             % Generating Random Bit Stream
+M = [4 16 64 256];                                                                                 % M-ary
+for j=1:4
+%% 16-QAM Modulation
+bits_sym = log2(M(j));                                                                             % Bits per Symbol for M-ary
+sym_tx = s2p(msg,bits_sym);                                                               % Serial to Parallel Conversion for QAM
+H_Tx = modem.qammod('M', M(j), 'PHASEOFFSET', 0, 'SYMBOLORDER', 'BINARY', ...
+                                                    'INPUTTYPE', 'BIT');                           % Generate Handle for Modulation
+qam_tx = modulate(H_Tx,sym_tx);                                               % Modulation
+%==================================== CHANNEL =======================================%
+Eb_No = 0:2:30;
+SNR = Eb_No + 10*log10(log2(M(j)));                                         % Finding out SNR from Eb/No
+for i=1:length(Eb_No)
+    qam_n = awgn(qam_tx,SNR(i),'measured');                      % Adding AWGN
+    % ================================== Rx ============================================%
+   
+%% QAM De-Modulation
+qam_rx = p2s(qam_n);
+H_Rx = modem.qamdemod('M', M(j), 'PHASEOFFSET', 0, 'SYMBOLORDER', 'BINARY', ...
+                 'OUTPUTTYPE', 'BIT');                                                 % Generate Handle for Modulation
+sym_rx = demodulate(H_Rx,qam_rx);                                % Modulating data to QAM
+%% Symbols to Msg Conversion
+msg_rx = p2s(sym_rx);
+msg_rx = msg_rx(1,1:length(msg));
+[ErrBits BER(i,j)] = symerr(msg_rx,msg);                            % Calculating BER by comparisson of Rx and Tx msg
+%%  Plot of  BER vs Eb/No
+end
+end
+semilogy(Eb_No,BER(:,1),'r-*',Eb_No,BER(:,2),'b-v',Eb_No,BER(:,3),'y-s',Eb_No,BER(:,4),'m-o');    
+legend('M=4','M=16','M=64','M=256');
+title('BER for QAM using AWGN channel');
+ylabel('BER');
+xlabel('Eb/No (dB)');
+grid;
+##### SOURCE END #####
+--></body></html>
